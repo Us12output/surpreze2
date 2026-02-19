@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-logo {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            color: #e94560;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        /* Page 1: Birthday Wish */
+        .page {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        #initial-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #e94560;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background-color: #e94560;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(233, 69, 96, 0.6);
+        }
+
+        #birthday-message {
+            display: none;
+            animation: popIn 1s ease forwards;
+        }
+
+        #birthday-message h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 5rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            margin-bottom: 10px;
+        }
+
+        #birthday-message p {
+            font-size: 1.5rem;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Page 2: Photo Gallery */
+        #gallery {
+            padding: 100px 50px;
+        }
+
+        .gallery-title {
+            text-align: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #ffd700;
+            margin-bottom: 50px;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Photo Card Styles */
+        .photo-card {
+            position: relative;
+            height: 350px;
+            border-radius: 20px;
+            overflow: visible; /* Changed to visible for hearts */
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+            border: 3px solid transparent;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: #e94560;
+            box-shadow: 0 20px 40px rgba(233, 69, 96, 0.4);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 18px;
+            transition: transform 0.5s;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.15);
+        }
+
+        /* Card Overlay */
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            border-radius: 0 0 18px 18px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s;
+        }
+
+        .photo-card:hover .card-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .card-overlay h3 {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .card-overlay p {
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        /* Global Hearts Container - For page top heart rain */
+        #global-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .falling-heart {
+            position: absolute;
+            font-size: 24px;
+            animation: fallHeart 2.5s linear forwards;
+            opacity: 0;
+        }
+
+        @keyframes fallHeart {
+            0% {
+                transform: translateY(-50px) rotate(0deg) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Additional hover glow effect */
+        .photo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.3) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.5s;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .photo-card:hover::before {
+            transform: scale(1);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0,0,0,0.3);
+            margin-top: 50px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 15px 20px;
+            }
+            
+            #birthday-message h1 {
+                font-size: 3rem;
+            }
+            
+            .gallery-container {
+                grid-template-columns: 1fr;
+                padding: 0 20px;
+            }
+        }
+        audio{
+            display: noe;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Global Hearts Container -->
+    <div id="global-hearts"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">❤️ Surprise</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#gallery">Gallery</a>
+        </div>
+    </nav>
+
+    <!-- Page 1: Birthday Wish -->
+    <section id="home" class="page">
+        <div class="container">
+            <div id="initial-screen">
+                <h1>Aapke liye kuch special hai...</h1>
+                <button class="btn" onclick="showSurprise()">Click to Celebrate 🎁</button>
+            </div>
+
+            <div id="birthday-message">
+                <h1>Happy Birthday, <br>Meri Pyaari Bachchi🥳! 🎉</h1>
+                <p>🎂 Muskurana bhi ek art hai😊, or tum ek achchhi Artist ho..!😁😌 🎂</p>
+                <audio controls loop>
+                    <source src="assets\re1.m4a" type="audio/mp3">
+                    </audio>
+                <a href="#gallery" class="btn">Photos Dekho 📸</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 2: Photo Gallery -->
+    <section id="gallery">
+        <h2 class="gallery-title">🌟 Hamari Yaadein 🌟</h2>
+        
+        <div class="gallery-container">
+            
+            <!-- Photo Card 1 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/10.jpg" alt="Photo 1">
+                <div class="card-overlay">
+                    <h3>❤️ My Friend</h3>
+                    <p>Best moments together</p>
+                </div>
+            </div>
+
+            <!-- Photo Card 2 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/13.jpg" alt="Photo 2">
+                <div class="card-overlay">
+                    <h3>🎉 Party Time</h3>
+                    <p>Unforgettable memories</p>
+                </div>
+            </div>
+
+            <!-- Photo Card 3 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/5.jpg" alt="Photo 3">
+                <div class="card-overlay">
+                    <h3>😊 Smiles</h3>
+                    <p>Always make me happy</p>
+                </div>
+            </div>
+
+            <!-- Photo Card 4 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/15.jpg" alt="Photo 4">
+                <div class="card-overlay">
+                    <h3>🌺 Beautiful Soul</h3>
+                    <p>You are amazing</p>
+                </div>
+            </div>
+
+            <!-- Photo Card 5 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/21.jpg" alt="Photo 5">
+                <div class="card-overlay">
+                    <h3>🎈 Fun Moments</h3>
+                    <p>Cherishing every moment</p>
+                </div>
+            </div>
+
+            <!-- Photo Card 6 -->
+            <div class="photo-card" onmouseenter="startHeartRain()" onmouseleave="stopHeartRain()">
+                <img src="assets/26.jpeg" alt="Photo 6">
+                <div class="card-overlay">
+                    <h3>👫 Bestie</h3>
+                    <p>Forever friends</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>Made with ❤️ for You</p>
+    </footer>
+
+    <script>
+        // Birthday Surprise Function
+        function showSurprise() {
+            const initialScreen = document.getElementById('initial-screen');
+            initialScreen.style.display = 'none';
+
+            const messageDiv = document.getElementById('birthday-message');
+            messageDiv.style.display = 'block';
+
+            startConfetti();
+        }
+
+        // Confetti Animation
+        function startConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            var randomInRange = function(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // Heart Rain Variables
+        let heartInterval;
+        let isRaining = false;
+
+        // Start Heart Rain from page top
+        function startHeartRain() {
+            if (isRaining) return;
+            isRaining = true;
+            
+            const heartsContainer = document.getElementById('global-hearts');
+            
+            // Create hearts continuously while hovering
+            heartInterval = setInterval(() => {
+                createHeart();
+            }, 150); // New heart every 150ms
+        }
+
+        // Stop Heart Rain
+        function stopHeartRain() {
+            isRaining = false;
+            clearInterval(heartInterval);
+        }
+
+        // Create single heart element
+        function createHeart() {
+            const heartsContainer = document.getElementById('global-hearts');
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            
+            // Random heart emoji
+            const hearts = ['❤️', '💕', '💖', '💗', '💓', '💞', '💘', '💝'];
+            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+            
+            // Random position from left
+            heart.style.left = Math.random() * 100 + 'vw';
+            
+            // Random size
+            const size = Math.random() * 20 + 20;
+            heart.style.fontSize = size + 'px';
+            
+            // Random animation duration
+            heart.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
+            
+            // Random delay
+            heart.style.animationDelay = '0s';
+            
+            heartsContainer.appendChild(heart);
+
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 3500);
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
